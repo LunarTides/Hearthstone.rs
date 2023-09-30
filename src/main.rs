@@ -1,3 +1,5 @@
+// TODO: Split into multiple files.
+
 use lazy_static::lazy_static;
 use std::{
     collections::HashMap,
@@ -6,44 +8,99 @@ use std::{
 
 mod cards;
 
-// TODO: Complete
 #[derive(Debug, Clone)]
 pub enum CardType {
     Minion,
     Spell,
+    Weapon,
+    Hero,
+    Location,
+    None,
 }
 
-// TODO: Complete
 #[derive(Debug, Clone)]
 pub enum MinionTribe {
+    Beast,
+    Demon,
+    Dragon,
+    Elemental,
+    Mech,
+    Murloc,
+    Naga,
+    Pirate,
+    Quilboar,
+    Totem,
+    Undead,
+    All,
     None,
 }
 
-// TODO: Complete
 #[derive(Debug, Clone)]
 pub enum SpellSchool {
+    Arcane,
+    Fel,
+    Fire,
+    Frost,
+    Holy,
+    Nature,
+    Shadow,
     None,
 }
 
-// TODO: Complete
 #[derive(Debug, Clone)]
 pub enum CardClass {
+    DeathKnight,
+    DemonHunter,
+    Druid,
+    Hunter,
+    Mage,
+    Paladin,
+    Priest,
+    Rogue,
+    Shaman,
+    Warlock,
+    Warrior,
     Neutral,
 }
 
-// TODO: Complete
 #[derive(Debug, Clone)]
 pub enum CardRarity {
     Free,
+    Common,
+    Rare,
+    Epic,
+    Legendary,
 }
 
-// TODO: Complete
+pub enum CostType {
+    Mana,
+    Armor,
+    Health,
+}
+
 #[derive(Debug, Clone)]
 pub enum CardKeyword {
+    DivineShield,
+    Dormant,
+    Lifesteal,
+    Poisonous,
+    Reborn,
+    Rush,
+    Stealth,
     Taunt,
+    Tradeable,
+    Windfury,
+    Outcast,
+    CastOnDraw,
+    Charge,
+    MegaWindfury,
+    Echo,
+    Magnetic,
+    Twinspell,
+    Elusive,
+    Cleave,
 }
 
-// TODO: Complete
 #[derive(Debug, Clone)]
 pub enum CardRunes {
     Blood,
@@ -51,12 +108,36 @@ pub enum CardRunes {
     Unholy,
 }
 
-// TODO: Complete
 #[derive(Debug, PartialEq, Eq, Hash, Clone)]
 pub enum Ability {
+    Adapt,
     Battlecry,
     Cast,
-    Setup,
+    Combo,
+    Deathrattle,
+    Finale,
+    Frenzy,
+    HeroPower,
+    HonorableKill,
+    Infuse,
+    Inspire,
+    Invoke,
+    Outcast,
+    Overheal,
+    Overkill,
+    Passive,
+    Spellburst,
+    StartOfGame,
+    Use,
+
+    Placeholders,
+    Condition,
+    Remove,
+    HandPassive,
+    Tick,
+    HandTick,
+    Test,
+    Create,
 }
 
 type AbilityCallback = fn(&mut Card);
@@ -102,7 +183,7 @@ impl Card {
         rarities: Vec<CardRarity>,
         collectible: bool,
         id: usize,
-        setup: AbilityCallback,
+        create_ability: AbilityCallback,
     ) -> Self {
         let mut card = Card {
             name,
@@ -133,13 +214,15 @@ impl Card {
             storage: None,
         };
 
-        card.abilities.insert(Ability::Setup, setup);
-        card.activate(Ability::Setup);
-
+        // Add the card to the list of cards
         let mut game = get_game();
         if !game.cards.iter().any(|c| c.id == card.id) {
             game.cards.push(card.clone());
         }
+
+        // Activate the `setup` ability
+        card.abilities.insert(Ability::Create, create_ability);
+        card.activate(Ability::Create);
 
         card
     }
