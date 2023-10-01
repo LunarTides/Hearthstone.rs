@@ -1,4 +1,7 @@
-use crate::{Card, CardClass, CardRarity, CardType};
+use crate::{
+    enums::{CardClass, CardRarity, CardType},
+    Card,
+};
 
 pub fn blueprint() -> Card {
     Card::new(
