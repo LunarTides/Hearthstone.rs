@@ -1,3 +1,5 @@
+use anyhow::Result;
+
 use crate::{
     enums::{Ability, CardClass, CardRarity, CardType},
     Card,
@@ -15,10 +17,12 @@ pub fn blueprint() -> Card {
         2,
         |this| {
             this.abilities.insert(Ability::Cast, cast);
+            Ok(())
         },
     )
 }
 
-pub fn cast(_: &mut Card) {
+pub fn cast(_: &mut Card) -> Result<()> {
     println!("Test");
+    Ok(())
 }

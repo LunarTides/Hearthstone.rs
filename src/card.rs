@@ -1,3 +1,4 @@
+use anyhow::Result;
 use std::collections::HashMap;
 
 use crate::{
@@ -7,7 +8,7 @@ use crate::{
     get_game,
 };
 
-type AbilityCallback = fn(&mut Card);
+pub type AbilityCallback = fn(&mut Card) -> Result<()>;
 type AbilityCallbacks = HashMap<Ability, AbilityCallback>;
 
 #[derive(Debug, Clone)]
@@ -95,8 +96,13 @@ impl Card {
     }
 
     pub fn activate(&mut self, ability: Ability) {
-        if let Some(ability) = self.clone().abilities.get(&ability) {
-            ability(self);
+        if let Some(callback) = self.clone().abilities.get(&ability) {
+            callback(self).unwrap_or_else(|err| {
+                panic!(
+                    "Something went wrong when running the '{:#?}' ability for '{}': {}",
+                    ability, self.name, err
+                )
+            })
         }
     }
 }

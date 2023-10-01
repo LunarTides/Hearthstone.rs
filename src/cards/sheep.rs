@@ -13,6 +13,6 @@ pub fn blueprint() -> Card {
         vec![CardRarity::Free],
         false,
         1,
-        |_| {},
+        |_| Ok(()),
     )
 }
