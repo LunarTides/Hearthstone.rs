@@ -4,7 +4,6 @@ use anyhow::Result;
 use card::Card;
 use enums::Guard;
 use lazy_static::lazy_static;
-use std::sync::{Mutex, MutexGuard};
 use player::Player;
 use std::sync::Mutex;
 
@@ -35,8 +34,8 @@ fn main() -> Result<()> {
     println!("Registered cards: {:?}", game.blueprints);
 
     // Activate all card's cast ability
-    for card in &game.cards {
-        card.clone().activate(Ability::Cast);
+    for card in &game.blueprints.clone() {
+        Card::new(card.get_name(), game.player1, &mut game).activate(Ability::Cast, &mut game);
     }
 
     Ok(())

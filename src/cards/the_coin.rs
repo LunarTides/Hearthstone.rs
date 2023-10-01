@@ -1,28 +1,27 @@
 use anyhow::Result;
 
 use crate::{
+    card::Blueprint,
     enums::{Ability, CardClass, CardRarity, CardType},
+    game::Game,
     Card,
 };
 
-pub fn blueprint() -> Card {
-    Card::new(
-        String::from("The Coin"),
-        String::from("Gain 1 Mana Crystal this turn only."),
-        0,
-        vec![CardType::Spell],
-        vec![CardClass::Neutral],
-        vec![CardRarity::Free],
-        false,
-        2,
-        |this| {
-            this.abilities.insert(Ability::Cast, cast);
-            Ok(())
-        },
-    )
+pub fn blueprint() -> Blueprint {
+    Blueprint::new()
+        .named("The Coin")
+        .with_text("Gain 1 Mana Crystal this turn only.")
+        .costing(0)
+        .with_type(CardType::Spell)
+        .with_class(CardClass::Neutral)
+        .with_rarity(CardRarity::Free)
+        .collectible(false)
+        .with_id(2)
+        .with_ability(Ability::Cast, cast)
+        .build()
 }
 
-pub fn cast(_: &mut Card) -> Result<()> {
-    println!("Test");
+pub fn cast(this: &mut Card, _: &mut Game) -> Result<()> {
+    println!("{}", this.owner.name.to_owned());
     Ok(())
 }

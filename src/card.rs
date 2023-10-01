@@ -3,8 +3,10 @@ use std::collections::HashMap;
 
 use crate::{
     enums::{
-        Ability, CardClass, CardKeyword, CardRarity, CardRunes, CardType, MinionTribe, SpellSchool,
+        Ability, CardClass, CardKeyword, CardRarity, CardRunes, CardType, CostType, Guard,
+        MinionTribe, SpellSchool,
     },
+    game::Game,
     get_game,
     player::Player,
 };
@@ -46,27 +48,23 @@ pub struct Card {
 }
 
 impl Card {
-    pub fn new(
-        name: String,
-        text: String,
-        cost: usize,
-        card_types: Vec<CardType>,
-        classes: Vec<CardClass>,
-        rarities: Vec<CardRarity>,
-        collectible: bool,
-        id: usize,
-        create_ability: AbilityCallback,
-    ) -> Self {
+    pub fn new(name: String, owner: &'static Player, game: &mut Guard<Game>) -> Self {
+        let blueprint = game
+            .blueprints
+            .iter()
+            .find(|card| card.name == name)
+            .expect("should find blueprint by name");
+
         let mut card = Card {
             name,
-            text,
-            card_types,
-            cost,
-            classes,
-            rarities,
-            collectible,
-            id,
-            abilities: HashMap::new(),
+            text: blueprint.text.to_owned(),
+            card_types: blueprint.card_types.to_owned(),
+            cost: blueprint.cost.to_owned(),
+            classes: blueprint.classes.to_owned(),
+            rarities: blueprint.rarities.to_owned(),
+            collectible: blueprint.collectible,
+            id: blueprint.id,
+            abilities: blueprint.abilities.to_owned(),
 
             display_name: None,
             stats: None,
@@ -84,14 +82,15 @@ impl Card {
             deck_settings: None,
             conditioned: None,
             storage: None,
+
+            cost_type: CostType::Mana,
+            owner,
         };
 
         // Activate the `setup` ability
-        card.abilities.insert(Ability::Create, create_ability);
-        card.activate(Ability::Create);
+        card.activate(Ability::Create, game);
 
         // Add the card to the list of cards
-        let mut game = get_game();
         if !game.cards.iter().any(|c| c.id == card.id) {
             game.cards.push(card.clone());
         }
@@ -99,14 +98,111 @@ impl Card {
         card
     }
 
-    pub fn activate(&mut self, ability: Ability) {
-        if let Some(callback) = self.clone().abilities.get(&ability) {
-            callback(self).unwrap_or_else(|err| {
-                panic!(
-                    "Something went wrong when running the '{:#?}' ability for '{}': {}",
-                    ability, self.name, err
-                )
-            })
+    pub fn activate(&mut self, ability: Ability, game: &mut Guard<Game>) {
+        if let Some(callbacks) = self.clone().abilities.get(&ability) {
+            for callback in callbacks {
+                callback(self, game).unwrap_or_else(|err| {
+                    panic!(
+                        "Something went wrong when running the '{:#?}' ability for '{}': {}",
+                        ability, self.name, err
+                    )
+                });
+            }
         }
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct Blueprint {
+    name: String,
+    text: String,
+    cost: usize,
+    card_types: Vec<CardType>,
+    classes: Vec<CardClass>,
+    rarities: Vec<CardRarity>,
+    collectible: bool,
+    id: usize,
+    abilities: AbilityCallbacks,
+}
+
+impl Blueprint {
+    pub fn new() -> Self {
+        Self {
+            name: String::default(),
+            text: String::default(),
+            cost: usize::default(),
+            card_types: Vec::default(),
+            classes: Vec::default(),
+            rarities: Vec::default(),
+            collectible: bool::default(),
+            id: usize::default(),
+            abilities: HashMap::default(),
+        }
+    }
+
+    pub fn named(mut self, name: &str) -> Self {
+        self.name = name.into();
+        self
+    }
+
+    pub fn with_text(mut self, text: &str) -> Self {
+        self.text = text.into();
+        self
+    }
+
+    pub fn costing(mut self, cost: usize) -> Self {
+        self.cost = cost;
+        self
+    }
+
+    pub fn with_type(mut self, card_type: CardType) -> Self {
+        self.card_types.push(card_type);
+        self
+    }
+
+    pub fn with_class(mut self, class: CardClass) -> Self {
+        self.classes.push(class);
+        self
+    }
+
+    pub fn with_rarity(mut self, rarity: CardRarity) -> Self {
+        self.rarities.push(rarity);
+        self
+    }
+
+    pub fn collectible(mut self, collectible: bool) -> Self {
+        self.collectible = collectible;
+        self
+    }
+
+    pub fn with_id(mut self, id: usize) -> Self {
+        self.id = id;
+        self
+    }
+
+    pub fn with_ability(mut self, key: Ability, value: AbilityCallback) -> Self {
+        if self.abilities.get(&key).is_some() {
+            self.abilities.get_mut(&key).unwrap().push(value);
+        } else {
+            self.abilities.insert(key, vec![value]);
+        }
+        self
+    }
+
+    pub fn build(self) -> Self {
+        let mut game = get_game();
+
+        game.blueprints.push(self.clone());
+        self
+    }
+
+    pub fn get_name(&self) -> String {
+        self.name.clone()
+    }
+}
+
+impl Default for Blueprint {
+    fn default() -> Self {
+        Self::new()
     }
 }

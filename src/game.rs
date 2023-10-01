@@ -1,7 +1,11 @@
-use crate::card::Card;
+use crate::{
+    card::{Blueprint, Card},
+    player::Player,
+};
 
 pub struct Game {
     pub cards: Vec<Card>,
+    pub blueprints: Vec<Blueprint>,
     pub player1: &'static Player,
     pub player2: &'static Player,
 }
