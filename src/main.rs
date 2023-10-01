@@ -14,6 +14,7 @@ mod enums;
 
 mod card;
 mod game;
+mod interact;
 mod player;
 
 lazy_static! {
@@ -37,6 +38,8 @@ fn main() -> Result<()> {
     for card in &game.blueprints.clone() {
         Card::new(card.get_name(), game.player1, &mut game).activate(Ability::Cast, &mut game);
     }
+
+    //interact::main()?;
 
     Ok(())
 }
