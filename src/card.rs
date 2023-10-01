@@ -6,10 +6,11 @@ use crate::{
         Ability, CardClass, CardKeyword, CardRarity, CardRunes, CardType, MinionTribe, SpellSchool,
     },
     get_game,
+    player::Player,
 };
 
-pub type AbilityCallback = fn(&mut Card) -> Result<()>;
-type AbilityCallbacks = HashMap<Ability, AbilityCallback>;
+pub type AbilityCallback = fn(&mut Card, &mut Game) -> Result<()>;
+type AbilityCallbacks = HashMap<Ability, Vec<AbilityCallback>>;
 
 #[derive(Debug, Clone)]
 pub struct Card {
@@ -39,6 +40,9 @@ pub struct Card {
     pub deck_settings: Option<String>,
     pub conditioned: Option<Ability>,
     pub storage: Option<HashMap<String, String>>,
+
+    pub cost_type: CostType,
+    pub owner: &'static Player,
 }
 
 impl Card {

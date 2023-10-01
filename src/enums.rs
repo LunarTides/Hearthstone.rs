@@ -1,3 +1,5 @@
+use std::sync::MutexGuard;
+
 #[derive(Debug, Clone)]
 pub enum CardType {
     Minion,
@@ -130,3 +132,5 @@ pub enum Ability {
     Test,
     Create,
 }
+
+pub type Guard<A> = MutexGuard<'static, A>;
