@@ -1,17 +1,17 @@
 use crate::{
-    card::{Blueprint, Card},
+    card::{Card, Blueprint},
     player::Player,
 };
 
-pub struct Game {
-    pub cards: Vec<Card>,
+pub struct Game<'a> {
+    pub cards: Vec<Card<'a>>,
     pub blueprints: Vec<Blueprint>,
-    pub player1: &'static Player,
-    pub player2: &'static Player,
+    pub player1: Player,
+    pub player2: Player,
 }
 
-impl Game {
-    pub fn new(player1: &'static Player, player2: &'static Player) -> Self {
+impl Game<'_> {
+    pub fn new(player1: Player, player2: Player) -> Self {
         Game {
             cards: vec![],
             blueprints: vec![],

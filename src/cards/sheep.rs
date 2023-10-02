@@ -1,9 +1,9 @@
 use crate::{
     card::Blueprint,
-    enums::{CardClass, CardRarity, CardType},
+    enums::{CardClass, CardRarity, CardType}, game::Game,
 };
 
-pub fn blueprint() -> Blueprint {
+pub fn blueprint(game: &mut Game) -> Blueprint {
     Blueprint::new()
         .named("Sheep")
         .costing(1)
@@ -12,5 +12,5 @@ pub fn blueprint() -> Blueprint {
         .with_rarity(CardRarity::Free)
         .collectible(false)
         .with_id(1)
-        .build()
+        .build(game)
 }

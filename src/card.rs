@@ -3,11 +3,10 @@ use std::collections::HashMap;
 
 use crate::{
     enums::{
-        Ability, CardClass, CardKeyword, CardRarity, CardRunes, CardType, CostType, Guard,
+        Ability, CardClass, CardKeyword, CardRarity, CardRunes, CardType, CostType,
         MinionTribe, SpellSchool,
     },
     game::Game,
-    get_game,
     player::Player,
 };
 
@@ -15,7 +14,7 @@ pub type AbilityCallback = fn(&mut Card, &mut Game) -> Result<()>;
 type AbilityCallbacks = HashMap<Ability, Vec<AbilityCallback>>;
 
 #[derive(Debug, Clone)]
-pub struct Card {
+pub struct Card<'a> {
     pub name: String,
     pub text: String,
     pub cost: usize,
@@ -44,11 +43,11 @@ pub struct Card {
     pub storage: Option<HashMap<String, String>>,
 
     pub cost_type: CostType,
-    pub owner: &'static Player,
+    pub owner: &'a Player,
 }
 
-impl Card {
-    pub fn new(name: String, owner: &'static Player, game: &mut Guard<Game>) -> Self {
+impl Card<'_> {
+    pub fn new(name: String, owner: &mut Player, game: &mut Game) -> Self {
         let blueprint = game
             .blueprints
             .iter()
@@ -87,7 +86,7 @@ impl Card {
             owner,
         };
 
-        // Activate the `setup` ability
+        // Activate the `create` ability
         card.activate(Ability::Create, game);
 
         // Add the card to the list of cards
@@ -98,7 +97,7 @@ impl Card {
         card
     }
 
-    pub fn activate(&mut self, ability: Ability, game: &mut Guard<Game>) {
+    pub fn activate(&mut self, ability: Ability, game: &mut Game) {
         if let Some(callbacks) = self.clone().abilities.get(&ability) {
             for callback in callbacks {
                 callback(self, game).unwrap_or_else(|err| {
@@ -189,9 +188,7 @@ impl Blueprint {
         self
     }
 
-    pub fn build(self) -> Self {
-        let mut game = get_game();
-
+    pub fn build(self, game: &mut Game) -> Self {
         game.blueprints.push(self.clone());
         self
     }
