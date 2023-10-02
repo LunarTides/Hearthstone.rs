@@ -10,11 +10,11 @@ use crate::{
     player::Player,
 };
 
-pub type AbilityCallback = fn(&mut Card, &mut Game) -> Result<()>;
+pub type AbilityCallback = fn(&mut Player, &mut Game, &mut Card) -> Result<()>;
 type AbilityCallbacks = HashMap<Ability, Vec<AbilityCallback>>;
 
 #[derive(Debug, Clone)]
-pub struct Card<'a> {
+pub struct Card {
     pub name: String,
     pub text: String,
     pub cost: usize,
@@ -43,10 +43,9 @@ pub struct Card<'a> {
     pub storage: Option<HashMap<String, String>>,
 
     pub cost_type: CostType,
-    pub owner: &'a Player,
 }
 
-impl Card<'_> {
+impl Card {
     pub fn new(name: String, owner: &mut Player, game: &mut Game) -> Self {
         let blueprint = game
             .blueprints
@@ -83,11 +82,10 @@ impl Card<'_> {
             storage: None,
 
             cost_type: CostType::Mana,
-            owner,
         };
 
         // Activate the `create` ability
-        card.activate(Ability::Create, game);
+        card.activate(Ability::Create, game, owner);
 
         // Add the card to the list of cards
         if !game.cards.iter().any(|c| c.id == card.id) {
@@ -97,10 +95,10 @@ impl Card<'_> {
         card
     }
 
-    pub fn activate(&mut self, ability: Ability, game: &mut Game) {
+    pub fn activate(&mut self, ability: Ability, game: &mut Game, owner: &mut Player) {
         if let Some(callbacks) = self.clone().abilities.get(&ability) {
             for callback in callbacks {
-                callback(self, game).unwrap_or_else(|err| {
+                callback(owner, game, self).unwrap_or_else(|err| {
                     panic!(
                         "Something went wrong when running the '{:#?}' ability for '{}': {}",
                         ability, self.name, err

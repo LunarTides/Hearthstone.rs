@@ -24,7 +24,9 @@ fn main() -> Result<()> {
     // Activate all card's cast ability
     let binding = &mut game;
     for card in &binding.blueprints {
-        Card::new(card.get_name(), &mut player1, binding).activate(Ability::Cast, binding);
+        let player1binding = &mut binding.player1;
+        let mut card = Card::new(card.get_name(), player1binding, binding);
+        card.activate(Ability::Cast, binding, player1binding);
     }
 
     //interact::main()?;

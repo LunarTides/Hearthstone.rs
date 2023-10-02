@@ -3,14 +3,14 @@ use crate::{
     player::Player,
 };
 
-pub struct Game<'a> {
-    pub cards: Vec<Card<'a>>,
+pub struct Game {
+    pub cards: Vec<Card>,
     pub blueprints: Vec<Blueprint>,
     pub player1: Player,
     pub player2: Player,
 }
 
-impl Game<'_> {
+impl Game {
     pub fn new(player1: Player, player2: Player) -> Self {
         Game {
             cards: vec![],
