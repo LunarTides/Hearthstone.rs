@@ -69,10 +69,9 @@ pub enum CostType {
     Health,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum CardKeyword {
     DivineShield,
-    Dormant,
     Lifesteal,
     Poisonous,
     Reborn,
@@ -90,6 +89,10 @@ pub enum CardKeyword {
     Twinspell,
     Elusive,
     Cleave,
+
+    Dormant,
+    Colossal,
+    Corrupt,
 }
 
 #[derive(Debug, Clone)]

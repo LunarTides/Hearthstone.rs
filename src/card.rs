@@ -24,7 +24,6 @@ pub struct Card {
     pub id: usize,
     pub abilities: AbilityCallbacks,
 
-    pub display_name: Option<String>,
     pub stats: Option<[usize; 2]>,
     pub tribes: Option<Vec<MinionTribe>>,
     pub spell_schools: Option<Vec<SpellSchool>>,
@@ -32,11 +31,8 @@ pub struct Card {
     pub cooldown: Option<usize>,
     pub heropower_text: Option<String>,
     pub heropower_cost: Option<usize>,
-    pub keywords: Option<Vec<CardKeyword>>,
+    pub keywords: HashMap<CardKeyword, Option<&'static str>>,
     pub runes: Option<Vec<CardRunes>>,
-    pub dormant: Option<usize>,
-    pub colossal: Option<Vec<String>>,
-    pub corrupt: Option<String>,
     pub deck_settings: Option<String>,
     pub conditioned: Option<Ability>,
     pub storage: Option<HashMap<String, String>>,
@@ -63,7 +59,6 @@ impl Card {
             id: blueprint.id,
             abilities: blueprint.abilities.to_owned(),
 
-            display_name: None,
             stats: None,
             tribes: None,
             spell_schools: None,
@@ -71,11 +66,8 @@ impl Card {
             cooldown: None,
             heropower_text: None,
             heropower_cost: None,
-            keywords: None,
+            keywords: HashMap::new(),
             runes: None,
-            dormant: None,
-            colossal: None,
-            corrupt: None,
             deck_settings: None,
             conditioned: None,
             storage: None,
@@ -106,14 +98,30 @@ impl Card {
             }
         }
     }
+
+    pub fn add_keyword(&mut self, keyword: CardKeyword, value: Option<&'static str>) {
+        self.keywords.insert(keyword, value);
+    }
 }
 
 #[derive(Debug, Clone)]
 pub struct Blueprint {
+    // Common / Required
     name: String,
     text: String,
     cost: usize,
     card_types: Vec<CardType>,
+
+    // Type-specific
+    stats: Option<[usize; 2]>,
+    tribes: Option<Vec<MinionTribe>>,
+    spell_schools: Option<Vec<SpellSchool>>,
+    durability: Option<usize>,
+    cooldown: Option<usize>,
+    heropower_text: Option<String>,
+    heropower_cost: Option<usize>,
+
+    // More required
     classes: Vec<CardClass>,
     rarities: Vec<CardRarity>,
     collectible: bool,
@@ -128,6 +136,15 @@ impl Blueprint {
             text: String::default(),
             cost: usize::default(),
             card_types: Vec::default(),
+
+            stats: None,
+            tribes: None,
+            spell_schools: None,
+            durability: None,
+            cooldown: None,
+            heropower_text: None,
+            heropower_cost: None,
+
             classes: Vec::default(),
             rarities: Vec::default(),
             collectible: bool::default(),
@@ -153,6 +170,56 @@ impl Blueprint {
 
     pub fn with_type(mut self, card_type: CardType) -> Self {
         self.card_types.push(card_type);
+        self
+    }
+
+    // Type-specific
+    pub fn with_stats(mut self, stats: [usize; 2]) -> Self {
+        self.stats = Some(stats);
+        self
+    }
+
+    pub fn with_tribe(mut self, tribe: MinionTribe) -> Self {
+        match self.tribes {
+            None => {
+                self.tribes = Some(vec![tribe]);
+            },
+            Some(ref mut tribes) => {
+                tribes.push(tribe);
+            }
+        }
+        self
+    }
+
+    pub fn with_spell_school(mut self, spell_school: SpellSchool) -> Self {
+        match self.spell_schools {
+            None => {
+                self.spell_schools = Some(vec![spell_school]);
+            },
+            Some(ref mut spell_schools) => {
+                spell_schools.push(spell_school);
+            }
+        }
+        self
+    }
+
+    pub fn with_durability(mut self, durability: usize) -> Self {
+        self.durability = Some(durability);
+        self
+    }
+
+    pub fn with_cooldown(mut self, cooldown: usize) -> Self {
+        self.cooldown = Some(cooldown);
+        self
+    }
+
+    pub fn with_heropower_text(mut self, heropower_text: &str) -> Self {
+        self.heropower_text = Some(heropower_text.into());
+        self
+    }
+
+    pub fn with_heropower_cost(mut self, heropower_cost: usize) -> Self {
+        self.heropower_cost = Some(heropower_cost);
         self
     }
 
