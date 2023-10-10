@@ -1,5 +1,5 @@
 use crate::{
-    card::{Card, Blueprint},
+    card::{Blueprint, Card},
     player::Player,
 };
 
@@ -20,7 +20,17 @@ impl Game {
         }
     }
 
-    pub fn setup() {
+    pub fn setup(&self) {
         // TODO: Choose random player
+    }
+
+    pub fn id_to_player(&mut self, id: u8) -> &mut Player {
+        if id == 0 {
+            return &mut self.player1;
+        } else if id == 1 {
+            return &mut self.player2;
+        }
+
+        unreachable!()
     }
 }

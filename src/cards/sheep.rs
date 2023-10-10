@@ -1,6 +1,7 @@
 use crate::{
     card::Blueprint,
-    enums::{CardClass, CardRarity, CardType}, game::Game,
+    enums::{CardClass, CardRarity, CardType},
+    game::Game,
 };
 
 pub fn blueprint(game: &mut Game) -> Blueprint {

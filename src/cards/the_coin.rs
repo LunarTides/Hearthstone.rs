@@ -4,7 +4,7 @@ use crate::{
     card::Blueprint,
     enums::{Ability, CardClass, CardRarity, CardType},
     game::Game,
-    Card, player::Player,
+    Card,
 };
 
 pub fn blueprint(game: &mut Game) -> Blueprint {
@@ -21,7 +21,9 @@ pub fn blueprint(game: &mut Game) -> Blueprint {
         .build(game)
 }
 
-pub fn cast(owner: &mut Player, game: &mut Game, this: &mut Card) -> Result<()> {
+pub fn cast(owner: u8, game: &mut Game, this: &mut Card) -> Result<()> {
+    let owner = game.id_to_player(owner);
+
     println!("{}", owner.name.to_owned());
     Ok(())
 }

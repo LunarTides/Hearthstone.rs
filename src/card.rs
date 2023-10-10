@@ -3,14 +3,13 @@ use std::collections::HashMap;
 
 use crate::{
     enums::{
-        Ability, CardClass, CardKeyword, CardRarity, CardRunes, CardType, CostType,
-        MinionTribe, SpellSchool,
+        Ability, CardClass, CardKeyword, CardRarity, CardRunes, CardType, CostType, MinionTribe,
+        SpellSchool,
     },
     game::Game,
-    player::Player,
 };
 
-pub type AbilityCallback = fn(&mut Player, &mut Game, &mut Card) -> Result<()>;
+pub type AbilityCallback = fn(u8, &mut Game, &mut Card) -> Result<()>;
 type AbilityCallbacks = HashMap<Ability, Vec<AbilityCallback>>;
 
 #[derive(Debug, Clone)]
@@ -46,7 +45,7 @@ pub struct Card {
 }
 
 impl Card {
-    pub fn new(name: String, owner: &mut Player, game: &mut Game) -> Self {
+    pub fn new(name: String, owner: u8, game: &mut Game) -> Self {
         let blueprint = game
             .blueprints
             .iter()
@@ -95,7 +94,7 @@ impl Card {
         card
     }
 
-    pub fn activate(&mut self, ability: Ability, game: &mut Game, owner: &mut Player) {
+    pub fn activate(&mut self, ability: Ability, game: &mut Game, owner: u8) {
         if let Some(callbacks) = self.clone().abilities.get(&ability) {
             for callback in callbacks {
                 callback(owner, game, self).unwrap_or_else(|err| {
