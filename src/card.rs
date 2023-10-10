@@ -3,15 +3,13 @@ use std::collections::HashMap;
 
 use crate::{
     enums::{
-        Ability, CardClass, CardKeyword, CardRarity, CardRunes, CardType, CostType, Guard,
-        MinionTribe, SpellSchool,
+        Ability, CardClass, CardKeyword, CardRarity, CardRunes, CardType, CostType, MinionTribe,
+        SpellSchool,
     },
     game::Game,
-    get_game,
-    player::Player,
 };
 
-pub type AbilityCallback = fn(&mut Card, &mut Game) -> Result<()>;
+pub type AbilityCallback = fn(u8, &mut Game, &mut Card) -> Result<()>;
 type AbilityCallbacks = HashMap<Ability, Vec<AbilityCallback>>;
 
 #[derive(Debug, Clone)]
@@ -44,11 +42,10 @@ pub struct Card {
     pub storage: Option<HashMap<String, String>>,
 
     pub cost_type: CostType,
-    pub owner: &'static Player,
 }
 
 impl Card {
-    pub fn new(name: String, owner: &'static Player, game: &mut Guard<Game>) -> Self {
+    pub fn new(name: String, owner: u8, game: &mut Game) -> Self {
         let blueprint = game
             .blueprints
             .iter()
@@ -84,11 +81,10 @@ impl Card {
             storage: None,
 
             cost_type: CostType::Mana,
-            owner,
         };
 
-        // Activate the `setup` ability
-        card.activate(Ability::Create, game);
+        // Activate the `create` ability
+        card.activate(Ability::Create, game, owner);
 
         // Add the card to the list of cards
         if !game.cards.iter().any(|c| c.id == card.id) {
@@ -98,10 +94,10 @@ impl Card {
         card
     }
 
-    pub fn activate(&mut self, ability: Ability, game: &mut Guard<Game>) {
+    pub fn activate(&mut self, ability: Ability, game: &mut Game, owner: u8) {
         if let Some(callbacks) = self.clone().abilities.get(&ability) {
             for callback in callbacks {
-                callback(self, game).unwrap_or_else(|err| {
+                callback(owner, game, self).unwrap_or_else(|err| {
                     panic!(
                         "Something went wrong when running the '{:#?}' ability for '{}': {}",
                         ability, self.name, err
@@ -189,9 +185,7 @@ impl Blueprint {
         self
     }
 
-    pub fn build(self) -> Self {
-        let mut game = get_game();
-
+    pub fn build(self, game: &mut Game) -> Self {
         game.blueprints.push(self.clone());
         self
     }
