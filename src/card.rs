@@ -127,6 +127,8 @@ pub struct Blueprint {
     collectible: bool,
     id: usize,
     abilities: AbilityCallbacks,
+
+    required_count: u8,
 }
 
 impl Blueprint {
@@ -150,35 +152,52 @@ impl Blueprint {
             collectible: bool::default(),
             id: usize::default(),
             abilities: HashMap::default(),
+
+            required_count: 0,
         }
     }
 
+    /// ## Required
     pub fn named(mut self, name: &str) -> Self {
+        self.required_count += 1;
+
         self.name = name.into();
         self
     }
 
     pub fn with_text(mut self, text: &str) -> Self {
+        // The text shouldn't be required, the default is ok
         self.text = text.into();
         self
     }
 
+    /// ## Required
     pub fn costing(mut self, cost: usize) -> Self {
+        self.required_count += 1;
+
         self.cost = cost;
         self
     }
 
+    /// ## Required
+    /// Run multiple times to add multiple types.
     pub fn with_type(mut self, card_type: CardType) -> Self {
+        self.required_count += 1;
+
         self.card_types.push(card_type);
         self
     }
 
     // Type-specific
+
+    /// ## Required for Minions / Weapons
     pub fn with_stats(mut self, stats: [usize; 2]) -> Self {
         self.stats = Some(stats);
         self
     }
 
+    /// ## Required for Minions
+    /// Run multiple times to add multiple tribes.
     pub fn with_tribe(mut self, tribe: MinionTribe) -> Self {
         match self.tribes {
             None => {
@@ -191,6 +210,8 @@ impl Blueprint {
         self
     }
 
+    /// ## Required for Spells
+    /// Run multiple times to add multiple spell schools.
     pub fn with_spell_school(mut self, spell_school: SpellSchool) -> Self {
         match self.spell_schools {
             None => {
@@ -203,46 +224,65 @@ impl Blueprint {
         self
     }
 
+    /// ## Required for Location cards
     pub fn with_durability(mut self, durability: usize) -> Self {
         self.durability = Some(durability);
         self
     }
 
+    /// ## Required for Location cards
     pub fn with_cooldown(mut self, cooldown: usize) -> Self {
         self.cooldown = Some(cooldown);
         self
     }
 
+    /// ## Required for Hero cards
     pub fn with_heropower_text(mut self, heropower_text: &str) -> Self {
         self.heropower_text = Some(heropower_text.into());
         self
     }
 
+    /// ## Required for Hero cards
     pub fn with_heropower_cost(mut self, heropower_cost: usize) -> Self {
         self.heropower_cost = Some(heropower_cost);
         self
     }
 
+    /// ## Required
+    /// Run multiple times to add multiple classes.
     pub fn with_class(mut self, class: CardClass) -> Self {
+        self.required_count += 1;
+
         self.classes.push(class);
         self
     }
 
+    /// ## Required
+    /// Run multiple times to add multiple rarities.
     pub fn with_rarity(mut self, rarity: CardRarity) -> Self {
+        self.required_count += 1;
+
         self.rarities.push(rarity);
         self
     }
 
+    /// ## Required
     pub fn collectible(mut self, collectible: bool) -> Self {
+        self.required_count += 1;
+
         self.collectible = collectible;
         self
     }
 
+    /// ## Required
     pub fn with_id(mut self, id: usize) -> Self {
+        self.required_count += 1;
+
         self.id = id;
         self
     }
 
+    /// Run multiple times to add multiple abilities.
     pub fn with_ability(mut self, key: Ability, value: AbilityCallback) -> Self {
         if self.abilities.get(&key).is_some() {
             self.abilities.get_mut(&key).unwrap().push(value);
@@ -252,7 +292,11 @@ impl Blueprint {
         self
     }
 
+    /// ## Required
+    /// Run this last
     pub fn build(self, game: &mut Game) -> Self {
+        assert!(self.required_count >= 7, "'{}' has too few fields. The required fields are: named, costing, with_type, with_class, with_rarity, collectible, with_id", self.name);
+
         game.blueprints.push(self.clone());
         self
     }
