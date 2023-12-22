@@ -2,7 +2,7 @@ use anyhow::Result;
 
 use crate::{
     card::Blueprint,
-    enums::{Ability, CardClass, CardRarity, CardType, CardKeyword, SpellSchool},
+    enums::{Ability, CardClass, CardKeyword, CardRarity, CardType, SpellSchool},
     game::Game,
     Card,
 };
@@ -29,6 +29,9 @@ pub fn cast(owner: u8, game: &mut Game, this: &mut Card) -> Result<()> {
     // The "2" should get converted to usize by some `handle_dormant` method
     this.add_keyword(CardKeyword::Dormant, Some("2"));
 
-    println!("{}", owner.name.to_owned());
+    let id = owner.id;
+
+    println!("{}", owner.name);
+    println!("{}", game.get_opponent_from_id(id).name);
     Ok(())
 }

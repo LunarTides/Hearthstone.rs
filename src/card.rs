@@ -77,12 +77,6 @@ impl Card {
 
         // Activate the `create` ability
         card.activate(Ability::Create, game, owner);
-
-        // Add the card to the list of cards
-        if !game.cards.iter().any(|c| c.id == card.id) {
-            game.cards.push(card.clone());
-        }
-
         card
     }
 
@@ -202,7 +196,7 @@ impl Blueprint {
         match self.tribes {
             None => {
                 self.tribes = Some(vec![tribe]);
-            },
+            }
             Some(ref mut tribes) => {
                 tribes.push(tribe);
             }
@@ -216,7 +210,7 @@ impl Blueprint {
         match self.spell_schools {
             None => {
                 self.spell_schools = Some(vec![spell_school]);
-            },
+            }
             Some(ref mut spell_schools) => {
                 spell_schools.push(spell_school);
             }

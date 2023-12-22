@@ -1,3 +1,5 @@
+use std::borrow::BorrowMut;
+
 use anyhow::Result;
 use card::Card;
 use player::Player;
@@ -10,6 +12,7 @@ mod enums;
 mod card;
 mod game;
 mod interact;
+mod functions;
 mod player;
 
 fn main() -> Result<()> {
@@ -22,20 +25,14 @@ fn main() -> Result<()> {
     println!("Registered cards: {:?}", game.blueprints);
 
     // Activate all card's cast ability
-    let mut names: Vec<String> = Vec::new();
+    functions::get_cards(&mut game);
 
     let binding = &mut game;
-    for card in &binding.blueprints {
-        let name = card.get_name();
-        names.push(name);
-    }
+    let cards: &mut Vec<Card> = binding.cards.borrow_mut();
 
-    for name in names {
-        let mut card = Card::new(name, 0, binding);
+    for card in cards {
         card.activate(Ability::Cast, binding, 0);
     }
-
-    //interact::main()?;
 
     Ok(())
 }

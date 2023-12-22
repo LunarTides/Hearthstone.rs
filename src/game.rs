@@ -8,6 +8,9 @@ pub struct Game {
     pub blueprints: Vec<Blueprint>,
     pub player1: Player,
     pub player2: Player,
+    pub current_player: u8,
+
+    pub board: [Vec<Card>; 2],
 }
 
 impl Game {
@@ -17,11 +20,20 @@ impl Game {
             blueprints: vec![],
             player1,
             player2,
+            current_player: 0,
+
+            board: [Vec::default(), Vec::default()],
         }
     }
 
-    pub fn setup(&self) {
-        // TODO: Choose random player
+    pub fn get_current_player(&mut self) -> &mut Player {
+        self.id_to_player(self.current_player)
+    }
+
+    pub fn get_opponent_from_id(&mut self, id: u8) -> &mut Player {
+        let opponent_id = 1 - id;
+
+        self.id_to_player(opponent_id)
     }
 
     pub fn id_to_player(&mut self, id: u8) -> &mut Player {
